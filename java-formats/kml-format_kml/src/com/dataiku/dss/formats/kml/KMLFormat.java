@@ -246,7 +246,7 @@ public class KMLFormat implements CustomFormat {
 
     public static class KMLFormatDetector implements CustomFormatSchemaDetector {
         @Override
-        public Schema readSchema(InputStreamWithFilename in) throws Exception {
+        public Schema readSchema(InputStreamWithContextInfo in) throws Exception {
             return null;
         }
 
