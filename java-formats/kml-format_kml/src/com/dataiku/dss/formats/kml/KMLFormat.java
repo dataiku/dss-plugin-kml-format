@@ -197,6 +197,7 @@ public class KMLFormat implements CustomFormat {
         @Override
         public void run(InputStreamWithContextInfo in, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
             if (in.getFilename() != null && in.getFilename().endsWith(".kmz")) {
+
                 throw new IllegalArgumentException("KMZ not supported yet");
             } else {
                 logger.info("Parsing KML");
