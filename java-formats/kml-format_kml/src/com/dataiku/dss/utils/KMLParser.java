@@ -121,7 +121,7 @@ public class KMLParser {
         out.emitRow(r);
     }
 
-    private void parseContainer(Node containerNode, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
+    public void parseContainer(Node containerNode, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
         for (int i = 0; i < containerNode.getChildNodes().getLength(); i++) {
             Node childNode = containerNode.getChildNodes().item(i);
             logger.info("Check child " + childNode);
