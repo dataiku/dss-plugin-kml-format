@@ -110,24 +110,12 @@ public class KMZFormat implements CustomFormat {
                 }
             }
 
-            // TODO: Include every lines beneath in the KMLParser() class
-            // TODO: Potentially use XMLUtils
             InputStream is = new ByteArrayInputStream(os.toByteArray());
             Document domDoc = XMLUtils.parse(is);
             KMLParser kmlParser = new KMLParser();
             Element kmlElt = domDoc.getDocumentElement();
             Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt,  "Document");
 
-/*
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(is);
-            Element kmlElt = doc.getDocumentElement();
-
-            KMLParser kmlParser = new KMLParser();
-            // Extract element on target
-            Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt, "Document");
-*/
             System.out.println("GOT documentNode " + documentElt);
             kmlParser.parseContainer(documentElt, out, cf, rf);
         }
