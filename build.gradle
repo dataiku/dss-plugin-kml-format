@@ -104,7 +104,7 @@ test {
     useJUnitPlatform()
 }
 
-task prepareForDistribution(type: Copy, dependsOn: ['clean', 'copyDependencies']) {
+task dist(type: Copy, dependsOn: ['clean', 'copyDependencies']) {
     from jar
-    into 'java-formats/kml-format_kml'
+    into 'lib'
 }
