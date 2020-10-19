@@ -139,12 +139,12 @@ public class KMZFormatTest {
                     "POINT(-43.1879756649956 -22.89383583837741)"),
                 new MockRow(
                     "Stop #4 - Victoria Falls, Zimbabwe",
-                    "Victoria Falls are the largest waterfalls in the world, and they are so large that it is said the best place to see them may possibly be from the air. The falls seperate Zimbabwe from Zambia, and are lined with a beautiful forest and serene lagoons where deadly hippo's and crocdiles can be found. Visitors have the option of a wide range of activities to explore the falls, which include kayaking, fishing, canoeing, walking safaris, horseback riding, or a flight over the falls. Whichever your choice it's sure to be exciting!', geom='POINT(25.85924489750097 -17.93289658717635)'}, MockRow{name='Stop #5 - Mount Everst, Nepal', description='Mount Everest is of course, the highest mountain in the world! It is part of the Himilayan mountain range,  located in Nepal. The first expedition to ever reach the top was in 1953, and this was also the eigth attempt. It's height reaches 29,028 ft. and although most may not want to climb the mountain fully, there are many camps at lower levels which tourists can visit until they feel they've gone far enough!",
-                    "POINT(86.94381245648268 27.99506677671201)"),
+                    "Victoria Falls are the largest waterfalls in the world, and they are so large that it is said the best place to see them may possibly be from the air. The falls seperate Zimbabwe from Zambia, and are lined with a beautiful forest and serene lagoons where deadly hippo's and crocdiles can be found. Visitors have the option of a wide range of activities to explore the falls, which include kayaking, fishing, canoeing, walking safaris, horseback riding, or a flight over the falls. Whichever your choice it's sure to be exciting!",
+                    "POINT(25.85924489750097 -17.93289658717635)"),
                 new MockRow(
-                        "Stop #5 - Mount Everst, Nepal",
-                        "Mount Everest is of course, the highest mountain in the world! It is part of the Himilayan mountain range,  located in Nepal. The first expedition to ever reach the top was in 1953, and this was also the eigth attempt. It's height reaches 29,028 ft. and although most may not want to climb the mountain fully, there are many camps at lower levels which tourists can visit until they feel they've gone far enough!",
-                        "POINT(86.94381245648268 27.99506677671201)"),
+                    "Stop #5 - Mount Everst, Nepal",
+                    "Mount Everest is of course, the highest mountain in the world! It is part of the Himilayan mountain range,  located in Nepal. The first expedition to ever reach the top was in 1953, and this was also the eigth attempt. It's height reaches 29,028 ft. and although most may not want to climb the mountain fully, there are many camps at lower levels which tourists can visit until they feel they've gone far enough!",
+                    "POINT(86.94381245648268 27.99506677671201)"),
                 new MockRow(
                     "Stop #6 - The Great Barrier Reef, Australia",
                     "The Great Barrier Reef is located on Australia's Gold Coast and spans more than 2000 km. It is home to thousands of plant and animal species and the Australian government has designated it as a protected Marine Park. Because the reef spans in a north to south direction, it travels thourgh many different climates, with rain forests and mountains more predominant in the north and coral cay more predominant in the south. There is a wide range of activities for tourists to explore the coral reef, which include scuba diving, swimming, snorkelling, a variety of watersports, boating, birdwatching, etc. The opportunities are endless!",
@@ -158,10 +158,6 @@ public class KMZFormatTest {
                     "Well I hope you have enjoyed our trip around the world as much as I have! Getting a chance to see the top 7 Natural Wonders of the World will definently be a highlight I will never forget! I hope you're not too tired and that yo got to learn a few new things too. Thanks for coming for the ride!",
                     "POINT(-78.32974664886251 44.3016392161836)")
                 );
-        assertThat(rows.get(1), is(expected.get(1)));
-        assertThat(rows.get(2), is(expected.get(2)));
-        assertThat(rows.get(3), is(expected.get(3)));
-        // TODO: Understand why the following call is failing
-        // assertThat(rows.get(4), is(expected.get(4)));
+        assertThat(rows, is(expected));
         }
 }
