@@ -5,18 +5,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.dataiku.dss.utils.KMLParser;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.dataiku.dip.coremodel.Schema;
 import com.dataiku.dip.datalayer.ColumnFactory;
@@ -28,10 +23,10 @@ import com.dataiku.dip.plugin.CustomFormatInput;
 import com.dataiku.dip.plugin.CustomFormatOutput;
 import com.dataiku.dip.plugin.CustomFormatSchemaDetector;
 import com.dataiku.dip.plugin.InputStreamWithContextInfo;
-import com.dataiku.dip.shaker.types.GeoPoint.Coords;
 import com.dataiku.dip.util.XMLUtils;
 import com.dataiku.dip.warnings.WarningsContext;
 import com.google.gson.JsonObject;
+import com.dataiku.dip.utils.DKULogger;
 
 public class KMLFormat implements CustomFormat {
     /**
@@ -84,45 +79,34 @@ public class KMLFormat implements CustomFormat {
         public void run(InputStreamWithContextInfo in, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
             InputStream is;
             if (in.getFilename() != null && in.getFilename().endsWith(".kmz")) {
-                System.out.println(in.getFilename());
+                logger.info("Parsing KMZ");
+                logger.info("Get following filename: " + in.getFilename());
                 InputStream inputStream = in.getInputStream();
-                // TODO: ZipInputStreamReader
-                // Unzip the InputStream
                 ZipInputStream zis = new ZipInputStream(inputStream);
                 ZipEntry entry;
                 ByteArrayOutputStream os = null;
                 while ((entry = zis.getNextEntry()) != null){
-                    System.out.println("Extracting:" + entry);
                     int count;
-
-                    String filename = entry.getName();
-                    System.out.println(filename);
-                    System.out.println(entry);
-                    System.out.println(entry.getName());
-
                     if (! entry.getName().equals("doc.kml")){
                         continue;
                     } else {
-                        System.out.println("Detected doc.kml");
                         os = new ByteArrayOutputStream();
-                        System.out.print("Filename: " + filename);
                         byte[] data = new byte[1024];
                         while ((count = zis.read(data, 0, 1024)) != -1){
                             os.write(data, 0, count);
                         }
                     }
                 }
-
                 is = new ByteArrayInputStream(os.toByteArray());
             } else {
                 logger.info("Parsing KML");
+                logger.infoV("Get following filename: {}", in.getFilename());
                 is = in.getInputStream();
             }
             Document domDoc = XMLUtils.parse(is);
             KMLParser kmlParser = new KMLParser();
             Element kmlElt = domDoc.getDocumentElement();
             Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt,  "Document");
-            System.out.println("GOT documentNode " + documentElt);
             kmlParser.parseContainer(documentElt, out, cf, rf);
         }
 
@@ -171,6 +155,6 @@ public class KMLFormat implements CustomFormat {
         public void close() throws IOException {
         }
     }
-
-    private static Logger logger = Logger.getLogger("dku");
+    protected static DKULogger logger = DKULogger.getLogger("dku");
+    // private static Logger logger = Logger.getLogger("dku");
 }
