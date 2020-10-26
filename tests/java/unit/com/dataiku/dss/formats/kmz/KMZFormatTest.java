@@ -78,7 +78,7 @@ public class KMZFormatTest {
     public void testReadKMZ() throws Exception {
         // Testing the class externally
         InputStream is = KMZFormatTest.class.getClassLoader().getResourceAsStream("com/dataiku/dss/formats/kmz/sample_kmz.kmz");
-        InputStreamWithContextInfo isci = new InputStreamWithContextInfo(is, null, null, null);
+        InputStreamWithContextInfo isci = new InputStreamWithContextInfo(is, null, "sample_kmz.kmz", null);
         // rows will be useful for the implementation of the ProcessorOutput
         final List<MockRow> rows = new ArrayList<>();
 
@@ -113,7 +113,7 @@ public class KMZFormatTest {
             }
         };
 
-        KMZFormat kmzFormat = new KMZFormat();
+        KMLFormat kmzFormat = new KMLFormat();
         CustomFormatInput kmzFormatInput = kmzFormat.getReader(null, null);
         kmzFormatInput.run(isci, accumulateRow, colFactory, rowFactory);
 

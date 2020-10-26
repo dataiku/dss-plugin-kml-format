@@ -84,7 +84,7 @@ public class KMLFormatTest {
         // Testing the class externally
         InputStream is = KMLFormatTest.class.getClassLoader().getResourceAsStream("com/dataiku/dss/formats/kml/light_kml.kml");
         // Create empty mock InputStreamWithContextInfo
-        InputStreamWithContextInfo isci = new InputStreamWithContextInfo(is, null, null, null);
+        InputStreamWithContextInfo isci = new InputStreamWithContextInfo(is, null, "light_kml.kml", null);
         // rows will be useful for the implementation of the ProcessorOutput
         final List<MockRow> rows = new ArrayList<>();
 

@@ -82,6 +82,7 @@ public class KMLFormat implements CustomFormat {
          */
         @Override
         public void run(InputStreamWithContextInfo in, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
+            InputStream is;
             if (in.getFilename() != null && in.getFilename().endsWith(".kmz")) {
                 System.out.println(in.getFilename());
                 InputStream inputStream = in.getInputStream();
@@ -112,24 +113,17 @@ public class KMLFormat implements CustomFormat {
                     }
                 }
 
-                InputStream is = new ByteArrayInputStream(os.toByteArray());
-                Document domDoc = XMLUtils.parse(is);
-                KMLParser kmlParser = new KMLParser();
-                Element kmlElt = domDoc.getDocumentElement();
-                Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt,  "Document");
-
-                System.out.println("GOT documentNode " + documentElt);
-                kmlParser.parseContainer(documentElt, out, cf, rf);
-
+                is = new ByteArrayInputStream(os.toByteArray());
             } else {
                 logger.info("Parsing KML");
-                Document domDoc = XMLUtils.parse(in.getInputStream());
-                KMLParser kmlParser = new KMLParser();
-                Element kmlElt = domDoc.getDocumentElement();
-                Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt,  "Document");
-                logger.info("GOT documentNode " + documentElt);
-                kmlParser.parseContainer(documentElt, out, cf, rf);
+                is = in.getInputStream();
             }
+            Document domDoc = XMLUtils.parse(is);
+            KMLParser kmlParser = new KMLParser();
+            Element kmlElt = domDoc.getDocumentElement();
+            Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt,  "Document");
+            System.out.println("GOT documentNode " + documentElt);
+            kmlParser.parseContainer(documentElt, out, cf, rf);
         }
 
         @Override
