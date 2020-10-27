@@ -19,3 +19,10 @@ To test the plugin using Gradle, do:
 ```bash
 ./gradlew test
 ```
+
+## Uploading the plugin to DSS
+
+To upload the plugin as a zip to DSS, run:
+```bash
+make plugin
+```
