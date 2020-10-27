@@ -83,11 +83,6 @@ task copyDependencies(type: Copy) {
     into 'java-lib'
 }
 
-clean.doLast {
-    delete 'java-lib'
-    delete 'lib'
-}
-
 sourceSets {
     main {
         java {
@@ -112,4 +107,9 @@ test {
 task dist(type: Copy, dependsOn: ['clean', 'copyDependencies']) {
     from jar
     into 'lib'
+}
+
+clean.doLast {
+    delete 'java-lib'
+    delete 'lib'
 }
