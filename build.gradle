@@ -6,7 +6,7 @@
  */
 
 plugins {
-	id 'java'	
+	id 'java-library'
 }
 
 group 'com.dataiku.dss.formats.kml'
@@ -81,6 +81,11 @@ task copyDependencies(type: Copy) {
     from configurations.runtimeOnlyDeps
     from configurations.remoteCompileDeps
     into 'java-lib'
+}
+
+clean.doLast {
+    delete 'java-lib'
+    delete 'lib'
 }
 
 sourceSets {

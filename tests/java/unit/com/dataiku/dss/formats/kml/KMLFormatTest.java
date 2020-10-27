@@ -99,25 +99,15 @@ public class KMLFormatTest {
     };
 
     private CustomFormatInput kmlFormatInput;
-    private ColumnFactory colFactory = new StreamColumnFactory();
-    private RowFactory rowFactory = new StreamRowFactory();
+    private ColumnFactory colFactory;
+    private RowFactory rowFactory;
 
     @BeforeEach()
     public void setupDSS() {
         ApplicationConfigurator.autoconfigure();
         kmlFormatInput = new KMLFormat().getReader(null, null);
-    }
-
-
-
-    @Test
-    public void testReadFile() throws IOException {
-        // For testing purpose only, make sure we can read from a file
-        InputStream is = KMLFormatTest.class.getClassLoader().getResourceAsStream("com/dataiku/dss/formats/kml/sample_kml.kml");
-        byte[] buffer = new byte[is.available()];
-        is.read(buffer);
-        String str = new String(buffer, "UTF-8");
-        System.out.println("Ran tests..." + str);
+        colFactory = new StreamColumnFactory();
+        rowFactory = new StreamRowFactory();
     }
 
     @Test

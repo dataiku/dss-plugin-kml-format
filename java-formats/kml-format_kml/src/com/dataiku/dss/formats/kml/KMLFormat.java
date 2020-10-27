@@ -155,6 +155,5 @@ public class KMLFormat implements CustomFormat {
         public void close() throws IOException {
         }
     }
-    protected static DKULogger logger = DKULogger.getLogger("dku");
-    // private static Logger logger = Logger.getLogger("dku");
+    private static DKULogger logger = DKULogger.getLogger("dku");
 }

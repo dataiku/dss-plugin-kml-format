@@ -1,12 +1,21 @@
 # KML & KMZ format extractor
 
-- Expose a KML Parser
-- Run tests of the project.
+- Expose a KML/KMZ parser
+- Run tests
+
+## Building the plugin
+
+To build the plugin using Gradle, do:
+```bash
+./gradlew build
+./gradlew dist
+```
+
+It will create a zip of the plugin in the dist folder. DSS uses this zip to install the plugin.
 
 ## Testing the plugin
 
-To build and test the plugin using Gradle, do:
-./gradlew build
-./gradlew dist
-
-Once done, a zip of the plugin is created in the dist folder. This archive will be the one used by DSS.
+To test the plugin using Gradle, do:
+```bash
+./gradlew test
+```
