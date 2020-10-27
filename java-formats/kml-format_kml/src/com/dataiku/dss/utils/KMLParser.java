@@ -20,9 +20,6 @@ public class KMLParser {
     public KMLParser() {}
 
     public Element getFirstNodeByTagName(Element parent, String name){
-        for (int i=0; i < parent.getChildNodes().getLength(); i++){
-            logger.info("Child "+i+":"+parent.getChildNodes().item(i));
-        }
         NodeList nl = parent.getElementsByTagName(name);
         if (nl.getLength()==0) return null;
         else return (Element)nl.item(0);
@@ -46,18 +43,20 @@ public class KMLParser {
     }
 
     private void parsePlacemark(Node node, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
-        Element e = (Element)node;
-        Row r = rf.row();
-        putContentIfExistsInChild(cf, r, "name", e, "name");
-        putAttrValueIfExists(cf, r, "id", e, "id");
-        extractAndSetPoint(cf, e, r);
-        extractAndSetLineString(cf, e, r);
-        extractAndSetExtendedData(cf, e, r);
-        putContentIfExistsInChild(cf, r, "description", e, "description");
-        putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
-        putContentIfExistsInChild(cf, r, "address", e, "address");
-        putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
-        out.emitRow(r);
+        if( node instanceof Element) {
+            Element e = (Element)node;
+            Row r = rf.row();
+            putContentIfExistsInChild(cf, r, "name", e, "name");
+            putAttrValueIfExists(cf, r, "id", e, "id");
+            extractAndSetPoint(cf, e, r);
+            extractAndSetLineString(cf, e, r);
+            extractAndSetExtendedData(cf, e, r);
+            putContentIfExistsInChild(cf, r, "description", e, "description");
+            putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
+            putContentIfExistsInChild(cf, r, "address", e, "address");
+            putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
+            out.emitRow(r);
+        }
     }
 
     private void extractAndSetExtendedData(ColumnFactory cf, Element e, Row r) {
@@ -66,14 +65,16 @@ public class KMLParser {
             NodeList nl = extendedDataElt.getElementsByTagName("Data");
             if (nl != null){
                 for (int i = 0; i < nl.getLength(); i++) {
-                    Element dataElt = (Element)nl.item(i);
-                    String dataName = dataElt.getAttribute("name");
-                    if (!StringUtils.isBlank(dataName)) {
-                        Element valueElt = getFirstNodeByTagName(dataElt, "value");
-                        if (valueElt != null) {
-                            String dataValue =  valueElt.getTextContent();
-                            if (!StringUtils.isBlank(dataValue)) {
-                                r.put(cf.column(dataName), dataValue.trim());
+                    if (nl.item(i) instanceof Element) {
+                        Element dataElt = (Element)nl.item(i);
+                        String dataName = dataElt.getAttribute("name");
+                        if (!StringUtils.isBlank(dataName)) {
+                            Element valueElt = getFirstNodeByTagName(dataElt, "value");
+                            if (valueElt != null) {
+                                String dataValue =  valueElt.getTextContent();
+                                if (!StringUtils.isBlank(dataValue)) {
+                                    r.put(cf.column(dataName), dataValue.trim());
+                                }
                             }
                         }
                     }
@@ -89,21 +90,23 @@ public class KMLParser {
             // Mandatory
             if (coordsElt != null){
                 String coordsTxt = coordsElt.getTextContent();
-                logger.info("Parse linestring: " + coordsTxt);
-                String[] points = StringUtils.splitByWholeSeparator(coordsTxt,  " ");
-                List<String> pointsStr = new ArrayList<>();
-                for (String point : points) {
-                    if (StringUtils.isBlank(point)){
-                        continue;
-                    };
-                    logger.info("POINT: --" + point + "--");
-                    String[] chunks = point.split(",");
-                    if(chunks.length >=2) {
-                        pointsStr.add(chunks[1] + " " + chunks[0]);
+                if (coordsTxt != null){
+                    String[] points = StringUtils.splitByWholeSeparator(coordsTxt,  " ");
+                    if (points != null){
+                        List<String> pointsStr = new ArrayList<>();
+                        for (String point : points) {
+                            if (StringUtils.isBlank(point)){
+                                continue;
+                            };
+                            String[] chunks = point.split(",");
+                            if(chunks.length >=2) {
+                                pointsStr.add(chunks[1] + " " + chunks[0]);
+                            }
+                        }
+                        if (pointsStr.size() >= 2){
+                            r.put(cf.column("geom"), "LINESTRING(" + StringUtils.join(pointsStr, ",") + ")");
+                        }
                     }
-                }
-                if (pointsStr.size() >= 2){
-                    r.put(cf.column("geom"), "LINESTRING(" + StringUtils.join(pointsStr, ",") + ")");
                 }
              }
         }
@@ -116,10 +119,12 @@ public class KMLParser {
             // Mandatory
             if (coordsElt != null){
                 String coordsTxt = coordsElt.getTextContent();
-                String[] chunks = coordsTxt.split(",");
-                if(chunks.length >= 2) {
-                    Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
-                    r.put(cf.column("geom"), coords.toWKT());
+                if (coordsTxt != null){
+                    String[] chunks = coordsTxt.split(",");
+                    if(chunks.length >= 2) {
+                        Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
+                        r.put(cf.column("geom"), coords.toWKT());
+                    }
                 }
             }
         }

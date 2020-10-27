@@ -1,9 +1,9 @@
 # KML & KMZ format extractor
 
-- Expose a KML/KMZ parser
-- Run tests
+This plugin contains a KML or KMZ parser allowing dataset creation from this format in DSS.
+Each row in the output dataset will contain a geospatial object (Coordinates, LineString ...) and any additional comments associated with it. 
 
-## Building the plugin
+## Build the plugin
 
 To build the plugin using Gradle, do:
 ```bash
@@ -13,14 +13,14 @@ To build the plugin using Gradle, do:
 
 It will create a zip of the plugin in the dist folder. DSS uses this zip to install the plugin.
 
-## Testing the plugin
+## Test
 
 To test the plugin using Gradle, do:
 ```bash
 ./gradlew test
 ```
 
-## Uploading the plugin to DSS
+## Upload to DSS
 
 To upload the plugin as a zip to DSS, run:
 ```bash
