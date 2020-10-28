@@ -1,6 +1,6 @@
 {
     "meta" : {
-        "label" : "KML"
+        "label" : "KML/KMZ"
     },
     "canBeDatasetFormat" : true,
     "canRead" : true,

@@ -1,16 +1,17 @@
 package com.dataiku.dss.formats.kml;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import org.apache.commons.lang.StringUtils;
+import com.dataiku.dss.utils.KMLParser;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.dataiku.dip.coremodel.Schema;
 import com.dataiku.dip.datalayer.ColumnFactory;
@@ -22,10 +23,10 @@ import com.dataiku.dip.plugin.CustomFormatInput;
 import com.dataiku.dip.plugin.CustomFormatOutput;
 import com.dataiku.dip.plugin.CustomFormatSchemaDetector;
 import com.dataiku.dip.plugin.InputStreamWithContextInfo;
-import com.dataiku.dip.shaker.types.GeoPoint.Coords;
 import com.dataiku.dip.util.XMLUtils;
 import com.dataiku.dip.warnings.WarningsContext;
 import com.google.gson.JsonObject;
+import com.dataiku.dip.utils.DKULogger;
 
 public class KMLFormat implements CustomFormat {
     /**
@@ -58,126 +59,6 @@ public class KMLFormat implements CustomFormat {
         return new KMLFormatDetector();
     }
 
-    private Element getFirstNodeByTagName(Element parent, String name) {
-        logger.info("Children of " + parent);
-        for (int i= 0; i < parent.getChildNodes().getLength(); i++){
-            logger.info("Child " + i + ": " + parent.getChildNodes().item(i));
-        }
-        NodeList nl = parent.getElementsByTagName(name);
-        if (nl.getLength() == 0) return null;
-        else return (Element)nl.item(0);
-    }
-    private String getTextContent(Node e) {
-        return e.getTextContent();
-    }
-
-    private void putAttrValueIfExists(ColumnFactory cf, Row r, String columnName, Element e, String attrName) {
-        String attrValue = e.getAttribute(attrName);
-        if (!StringUtils.isBlank(attrValue)) {
-            r.put(cf.column(columnName), attrValue);
-        }
-    }
-
-
-    private void putContentIfExistsInChild(ColumnFactory cf, Row r, String columnName, Element e, String childNodeName) {
-        Node childNode = getFirstNodeByTagName(e, childNodeName);
-        if (childNode != null) {
-            String txt = getTextContent(childNode);
-            if (txt != null) r.put(cf.column(columnName), txt);
-        }
-    }
-
-    private void parsePlacemark(Node node, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
-        Element e = (Element)node;
-        //assert(node.getLocalName().equals("Placemark"));
-
-        Row r = rf.row();
-
-        putContentIfExistsInChild(cf, r, "name", e, "name");
-        cf.column("id");
-        putAttrValueIfExists(cf, r, "id", e, "id");
-
-        cf.column("geom");
-
-        {
-            Element pointNode = getFirstNodeByTagName(e, "Point");
-            if (pointNode != null) {
-                Element coordsElt = getFirstNodeByTagName(pointNode, "coordinates");
-                // Mandatory
-                String coordsTxt = getTextContent(coordsElt);
-                String[] chunks = coordsTxt.split(",");
-
-                Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
-                r.put(cf.column("geom"), coords.toWKT());
-            }
-        }
-
-        {
-            Element linestringNode = getFirstNodeByTagName(e, "LineString");
-            if (linestringNode != null) {
-                Element coordsElt = getFirstNodeByTagName(linestringNode, "coordinates");
-                // Mandatory
-                String coordsTxt = getTextContent(coordsElt);
-                logger.info("Parse linestring: " + coordsTxt);
-                String[] points = StringUtils.splitByWholeSeparator(coordsTxt,  " ");
-
-                List<String> pointsStr = new ArrayList<>();
-                for (String point : points) {
-                    if (StringUtils.isBlank(point)) continue;
-                    logger.info("POINT: --" + point + "--");
-                    String[] chunks = point.split(",");
-                    pointsStr.add(chunks[1] + " " + chunks[0]);
-                }
-                r.put(cf.column("geom"), "LINESTRING(" + StringUtils.join(pointsStr, ",") + ")");
-            }
-        }
-
-        {
-            Element extendedDataElt = getFirstNodeByTagName(e, "ExtendedData");
-            if (extendedDataElt != null) {
-                NodeList nl = extendedDataElt.getElementsByTagName("Data");
-                for (int i = 0; i < nl.getLength(); i++) {
-                    Element dataElt = (Element)nl.item(i);
-                    String dataName = dataElt.getAttribute("name");
-                    if (!StringUtils.isBlank(dataName)) {
-                        Element valueElt = getFirstNodeByTagName(dataElt, "value");
-                        if (valueElt != null) {
-                            String dataValue =  valueElt.getTextContent();
-                            if (!StringUtils.isBlank(dataValue)) {
-                                r.put(cf.column(dataName), dataValue.trim());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        putContentIfExistsInChild(cf, r, "description", e, "description");
-        putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
-        putContentIfExistsInChild(cf, r, "address", e, "address");
-        putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
-
-
-
-        out.emitRow(r);
-    }
-
-    private void parseContainer(Node containerNode, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
-        for (int i = 0; i < containerNode.getChildNodes().getLength(); i++) {
-            Node childNode = containerNode.getChildNodes().item(i);
-            logger.info("Check child " + childNode);
-            if (childNode instanceof Element) {
-                Element childElt = (Element)childNode;
-                logger.info("  " + childElt.getTagName());
-                if (childElt.getTagName().equals("Placemark")) {
-                    parsePlacemark(childNode, out, cf, rf);
-                } else if (childElt.getTagName().equals("Folder")) {
-                    parseContainer(childNode, out, cf, rf);
-                }
-            }
-        }
-    }
-
     public  class KMLFormatInput implements CustomFormatInput {
         /**
          * Called if the schema is available (ie, dataset has been created)
@@ -196,17 +77,37 @@ public class KMLFormat implements CustomFormat {
          */
         @Override
         public void run(InputStreamWithContextInfo in, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
+            InputStream is;
             if (in.getFilename() != null && in.getFilename().endsWith(".kmz")) {
-                throw new IllegalArgumentException("KMZ not supported yet");
+                logger.info("Parsing KMZ");
+                logger.info("Get following filename: " + in.getFilename());
+                InputStream inputStream = in.getInputStream();
+                ZipInputStream zis = new ZipInputStream(inputStream);
+                ZipEntry entry;
+                ByteArrayOutputStream os = null;
+                while ((entry = zis.getNextEntry()) != null){
+                    int count;
+                    if (! entry.getName().equals("doc.kml")){
+                        continue;
+                    } else {
+                        os = new ByteArrayOutputStream();
+                        byte[] data = new byte[1024];
+                        while ((count = zis.read(data, 0, 1024)) != -1){
+                            os.write(data, 0, count);
+                        }
+                    }
+                }
+                is = new ByteArrayInputStream(os.toByteArray());
             } else {
                 logger.info("Parsing KML");
-                Document domDoc = XMLUtils.parse(in.getInputStream());
-
-                Element kmlElt = domDoc.getDocumentElement();
-                Element documentElt = getFirstNodeByTagName(kmlElt,  "Document");
-                logger.info("GOT documentNode " + documentElt);
-                parseContainer(documentElt, out, cf, rf);
+                logger.infoV("Get following filename: {}", in.getFilename());
+                is = in.getInputStream();
             }
+            Document domDoc = XMLUtils.parse(is);
+            KMLParser kmlParser = new KMLParser();
+            Element kmlElt = domDoc.getDocumentElement();
+            Element documentElt = kmlParser.getFirstNodeByTagName(kmlElt,  "Document");
+            kmlParser.parseContainer(documentElt, out, cf, rf);
         }
 
         @Override
@@ -246,7 +147,7 @@ public class KMLFormat implements CustomFormat {
 
     public static class KMLFormatDetector implements CustomFormatSchemaDetector {
         @Override
-        public Schema readSchema(InputStreamWithFilename in) throws Exception {
+        public Schema readSchema(InputStreamWithContextInfo in) throws Exception {
             return null;
         }
 
@@ -254,6 +155,5 @@ public class KMLFormat implements CustomFormat {
         public void close() throws IOException {
         }
     }
-
-    private static Logger logger = Logger.getLogger("dku");
+    private static DKULogger logger = DKULogger.getLogger("dku");
 }

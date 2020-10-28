@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+
+    <name>KML Samples</name>
+
+    <open>1</open>
+
+    <Folder>
+
+      <Placemark>
+        <name>Extruded placemark</name>
+        <visibility>0</visibility>
+        <description>Tethered to the ground by a customizable
+          &quot;tail&quot;</description>
+        <LookAt>
+          <longitude>-122.0845787421525</longitude>
+          <latitude>37.42215078737763</latitude>
+          <altitude>0</altitude>
+          <heading>-148.4126684946234</heading>
+          <tilt>40.55750733918048</tilt>
+          <range>365.2646606980322</range>
+        </LookAt>
+        <styleUrl>#globeIcon</styleUrl>
+        <Point>
+          <extrude>1</extrude>
+          <altitudeMode>relativeToGround</altitudeMode>
+          <coordinates>-122.0857667006183,37.42156927867553,50</coordinates>
+        </Point>
+      </Placemark>
+
+    </Folder>
+
+    <Folder>
+
+      <name>Styles and Markup</name>
+      <visibility>0</visibility>
+      <description>With KML it is easy to create rich, descriptive markup to
+        annotate and enrich your placemarks</description>
+      <LookAt>
+        <longitude>-122.0845787422371</longitude>
+        <latitude>37.42215078726837</latitude>
+        <altitude>0</altitude>
+        <heading>-148.4126777488172</heading>
+        <tilt>40.55750733930874</tilt>
+        <range>365.2646826292919</range>
+      </LookAt>
+      <styleUrl>#noDrivingDirections</styleUrl>
+      <Document>
+        <name>Highlighted Icon</name>
+        <visibility>0</visibility>
+        <description>Place your mouse over the icon to see it display the new
+          icon</description>
+        <LookAt>
+          <longitude>-122.0856552124024</longitude>
+          <latitude>37.4224281311035</latitude>
+          <altitude>0</altitude>
+          <heading>0</heading>
+          <tilt>0</tilt>
+          <range>265.8520424250024</range>
+        </LookAt>
+        <Style id="highlightPlacemark">
+          <IconStyle>
+            <Icon>
+              <href>http://maps.google.com/mapfiles/kml/paddle/red-stars.png</href>
+            </Icon>
+          </IconStyle>
+        </Style>
+        <Style id="normalPlacemark">
+          <IconStyle>
+            <Icon>
+              <href>http://maps.google.com/mapfiles/kml/paddle/wht-blank.png</href>
+            </Icon>
+          </IconStyle>
+        </Style>
+        <StyleMap id="exampleStyleMap">
+          <Pair>
+            <key>normal</key>
+            <styleUrl>#normalPlacemark</styleUrl>
+          </Pair>
+          <Pair>
+            <key>highlight</key>
+            <styleUrl>#highlightPlacemark</styleUrl>
+          </Pair>
+        </StyleMap>
+        <Placemark>
+          <name>Roll over this icon</name>
+          <visibility>0</visibility>
+          <styleUrl>#exampleStyleMap</styleUrl>
+          <Point>
+            <coordinates>-122.0856545755255,37.42243077405461,0</coordinates>
+          </Point>
+        </Placemark>
+      </Document>
+
+      <Placemark>
+        <name>Tessellated</name>
+        <visibility>0</visibility>
+        <description><![CDATA[If the <tessellate> tag has a value of 1, the line will contour to the underlying terrain]]></description>
+        <LookAt>
+          <longitude>-112.0822680013139</longitude>
+          <latitude>36.09825589333556</latitude>
+          <altitude>0</altitude>
+          <heading>103.8120432044965</heading>
+          <tilt>62.04855796276328</tilt>
+          <range>2889.145007690472</range>
+        </LookAt>
+        <LineString>
+          <tessellate>1</tessellate>
+          <coordinates> -112.0814237830345,36.10677870477137,0
+            -112.0870267752693,36.0905099328766,0 </coordinates>
+        </LineString>
+      </Placemark>
+
+    </Folder>
+
+    <Folder>
+
+      <name>Polygons</name>
+      <visibility>0</visibility>
+      <description>Examples of polygon shapes</description>
+      <Folder>
+        <name>Google Campus</name>
+        <visibility>0</visibility>
+        <description>A collection showing how easy it is to create 3-dimensional
+          buildings</description>
+        <LookAt>
+          <longitude>-122.084120030116</longitude>
+          <latitude>37.42174011925477</latitude>
+          <altitude>0</altitude>
+          <heading>-34.82469740081282</heading>
+          <tilt>53.454348562403</tilt>
+          <range>276.7870053764046</range>
+        </LookAt>
+
+        <Placemark>
+
+          <name>Building 40</name>
+          <visibility>0</visibility>
+          <styleUrl>#transRedPoly</styleUrl>
+          <Polygon>
+            <extrude>1</extrude>
+            <altitudeMode>relativeToGround</altitudeMode>
+            <outerBoundaryIs>
+              <LinearRing>
+                <coordinates> -122.0848938459612,37.42257124044786,17
+                  -122.0849580979198,37.42211922626856,17
+                  -122.0847469573047,37.42207183952619,17
+                  -122.0845725380962,37.42209006729676,17
+                  -122.0845954886723,37.42215932700895,17
+                  -122.0838521118269,37.42227278564371,17
+                  -122.083792243335,37.42203539112084,17
+                  -122.0835076656616,37.42209006957106,17
+                  -122.0834709464152,37.42200987395161,17
+                  -122.0831221085748,37.4221046494946,17
+                  -122.0829247374572,37.42226503990386,17
+                  -122.0829339169385,37.42231242843094,17
+                  -122.0833837359737,37.42225046087618,17
+                  -122.0833607854248,37.42234159228745,17
+                  -122.0834204551642,37.42237075460644,17
+                  -122.083659133885,37.42251292011001,17
+                  -122.0839758438952,37.42265873093781,17
+                  -122.0842374743331,37.42265143972521,17
+                  -122.0845036949503,37.4226514386435,17
+                  -122.0848020460801,37.42261133916315,17
+                  -122.0847882750515,37.42256395055121,17
+                  -122.0848938459612,37.42257124044786,17 </coordinates>
+              </LinearRing>
+            </outerBoundaryIs>
+          </Polygon>
+        </Placemark>
+
+      </Folder>
+    </Folder>
+  </Document>
+</kml>
