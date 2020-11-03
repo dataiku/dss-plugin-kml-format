@@ -1,6 +1,6 @@
 {
 	"id": "kml-format",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"meta": {
 		"label": "KML Format extractor",
 		"description": "Read Google Earth KML files",
