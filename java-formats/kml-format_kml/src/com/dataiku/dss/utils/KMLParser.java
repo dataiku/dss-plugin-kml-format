@@ -50,6 +50,7 @@ public class KMLParser {
             putAttrValueIfExists(cf, r, "id", e, "id");
             extractAndSetPoint(cf, e, r);
             extractAndSetLineString(cf, e, r);
+            extractAndSetPolygon(cf, e, r);
             extractAndSetExtendedData(cf, e, r);
             putContentIfExistsInChild(cf, r, "description", e, "description");
             putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
@@ -83,6 +84,24 @@ public class KMLParser {
         }
     }
 
+    private void extractAndSetPoint(ColumnFactory cf, Element e, Row r) {
+        Element pointNode = getFirstNodeByTagName(e, "Point");
+        if (pointNode != null) {
+            Element coordsElt = getFirstNodeByTagName(pointNode, "coordinates");
+            // Mandatory
+            if (coordsElt != null){
+                String coordsTxt = coordsElt.getTextContent();
+                if (coordsTxt != null){
+                    String[] chunks = coordsTxt.split(",");
+                    if(chunks.length >= 2) {
+                        Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
+                        r.put(cf.column("geom"), coords.toWKT());
+                    }
+                }
+            }
+        }
+    }
+
     private void extractAndSetLineString(ColumnFactory cf, Element e, Row r) {
         Element linestringNode = getFirstNodeByTagName(e, "LineString");
         if (linestringNode != null) {
@@ -108,27 +127,39 @@ public class KMLParser {
                         }
                     }
                 }
-             }
+            }
         }
     }
 
-    private void extractAndSetPoint(ColumnFactory cf, Element e, Row r) {
-        Element pointNode = getFirstNodeByTagName(e, "Point");
-        if (pointNode != null) {
-            Element coordsElt = getFirstNodeByTagName(pointNode, "coordinates");
+    private void extractAndSetPolygon(ColumnFactory cf, Element e, Row r) {
+        Element linestringNode = getFirstNodeByTagName(e, "Polygon");
+        if (linestringNode != null) {
+            Element coordsElt = getFirstNodeByTagName(linestringNode, "coordinates");
             // Mandatory
             if (coordsElt != null){
                 String coordsTxt = coordsElt.getTextContent();
                 if (coordsTxt != null){
-                    String[] chunks = coordsTxt.split(",");
-                    if(chunks.length >= 2) {
-                        Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
-                        r.put(cf.column("geom"), coords.toWKT());
+                    String[] points = StringUtils.splitByWholeSeparator(coordsTxt,  " ");
+                    if (points != null){
+                        List<String> pointsStr = new ArrayList<>();
+                        for (String point : points) {
+                            if (StringUtils.isBlank(point)){
+                                continue;
+                            };
+                            String[] chunks = point.split(",");
+                            if(chunks.length >=2) {
+                                pointsStr.add(chunks[1] + " " + chunks[0]);
+                            }
+                        }
+                        if (pointsStr.size() >= 2){
+                            r.put(cf.column("geom"), "POLYGON(" + StringUtils.join(pointsStr, ",") + ")");
+                        }
                     }
                 }
             }
         }
     }
+
 
     public void parseContainer(Node containerNode, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
         for (int i = 0; i < containerNode.getChildNodes().getLength(); i++) {
