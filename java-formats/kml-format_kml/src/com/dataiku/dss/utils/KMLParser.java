@@ -47,15 +47,21 @@ public class KMLParser {
             Element e = (Element)node;
             Row r = rf.row();
             putContentIfExistsInChild(cf, r, "name", e, "name");
-            putAttrValueIfExists(cf, r, "id", e, "id");
-            extractAndSetPoint(cf, e, r);
-            extractAndSetLineString(cf, e, r);
-            extractAndSetExtendedData(cf, e, r);
-            putContentIfExistsInChild(cf, r, "description", e, "description");
-            putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
-            putContentIfExistsInChild(cf, r, "address", e, "address");
-            putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
-            out.emitRow(r);
+            boolean foundPoint = extractAndSetPoint(cf, e, r);
+            boolean foundLineString = extractAndSetLineString(cf, e, r);
+            boolean foundPolygon = extractAndSetPolygon(cf, e, r);
+            boolean foundParsableGeoObject = foundLineString || foundPoint || foundPolygon;
+            if (foundParsableGeoObject){
+                putAttrValueIfExists(cf, r, "id", e, "id");
+                extractAndSetExtendedData(cf, e, r);
+                putContentIfExistsInChild(cf, r, "description", e, "description");
+                putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
+                putContentIfExistsInChild(cf, r, "address", e, "address");
+                putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
+                out.emitRow(r);
+            } else {
+                logger.infoV("Warning: A placemark has been skipped due to unsupported geospatial format.");
+            }
         }
     }
 
@@ -83,7 +89,29 @@ public class KMLParser {
         }
     }
 
-    private void extractAndSetLineString(ColumnFactory cf, Element e, Row r) {
+    private boolean extractAndSetPoint(ColumnFactory cf, Element e, Row r) {
+        boolean foundPoint = false;
+        Element pointNode = getFirstNodeByTagName(e, "Point");
+        if (pointNode != null) {
+            Element coordsElt = getFirstNodeByTagName(pointNode, "coordinates");
+            // Mandatory
+            if (coordsElt != null){
+                String coordsTxt = coordsElt.getTextContent();
+                if (coordsTxt != null){
+                    String[] chunks = coordsTxt.split(",");
+                    if(chunks.length >= 2) {
+                        Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
+                        r.put(cf.column("geom"), coords.toWKT());
+                    }
+                }
+            }
+            foundPoint = true;
+        }
+        return foundPoint;
+    }
+
+    private boolean extractAndSetLineString(ColumnFactory cf, Element e, Row r) {
+        boolean foundLineString = false;
         Element linestringNode = getFirstNodeByTagName(e, "LineString");
         if (linestringNode != null) {
             Element coordsElt = getFirstNodeByTagName(linestringNode, "coordinates");
@@ -108,27 +136,44 @@ public class KMLParser {
                         }
                     }
                 }
-             }
+            }
+            foundLineString = true;
         }
+        return foundLineString;
     }
 
-    private void extractAndSetPoint(ColumnFactory cf, Element e, Row r) {
-        Element pointNode = getFirstNodeByTagName(e, "Point");
-        if (pointNode != null) {
-            Element coordsElt = getFirstNodeByTagName(pointNode, "coordinates");
+    private boolean extractAndSetPolygon(ColumnFactory cf, Element e, Row r) {
+        boolean foundPolygon = false;
+        Element linestringNode = getFirstNodeByTagName(e, "Polygon");
+        if (linestringNode != null) {
+            Element coordsElt = getFirstNodeByTagName(linestringNode, "coordinates");
             // Mandatory
             if (coordsElt != null){
                 String coordsTxt = coordsElt.getTextContent();
                 if (coordsTxt != null){
-                    String[] chunks = coordsTxt.split(",");
-                    if(chunks.length >= 2) {
-                        Coords coords = new Coords(Double.parseDouble(chunks[1]), Double.parseDouble(chunks[0]));
-                        r.put(cf.column("geom"), coords.toWKT());
+                    String[] points = StringUtils.splitByWholeSeparator(coordsTxt,  " ");
+                    if (points != null){
+                        List<String> pointsStr = new ArrayList<>();
+                        for (String point : points) {
+                            if (StringUtils.isBlank(point)){
+                                continue;
+                            };
+                            String[] chunks = point.split(",");
+                            if(chunks.length >=2) {
+                                pointsStr.add(chunks[1] + " " + chunks[0]);
+                            }
+                        }
+                        if (pointsStr.size() >= 2){
+                            r.put(cf.column("geom"), "POLYGON((" + StringUtils.join(pointsStr, ",") + "))");
+                        }
                     }
                 }
             }
+            foundPolygon = true;
         }
+        return foundPolygon;
     }
+
 
     public void parseContainer(Node containerNode, ProcessorOutput out, ColumnFactory cf, RowFactory rf) throws Exception {
         for (int i = 0; i < containerNode.getChildNodes().getLength(); i++) {
