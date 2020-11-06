@@ -1,5 +1,6 @@
 package com.dataiku.dss.utils;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import com.dataiku.dip.datalayer.ColumnFactory;
 import com.dataiku.dip.datalayer.ProcessorOutput;
 import com.dataiku.dip.datalayer.Row;
 import com.dataiku.dip.datalayer.RowFactory;
+import com.dataiku.dip.shaker.types.GeoPoint;
 import com.dataiku.dip.utils.DKULogger;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Element;
@@ -125,10 +127,10 @@ public class KMLParser {
                         for (String point : points) {
                             if (StringUtils.isBlank(point)){
                                 continue;
-                            };
+                            }
                             String[] chunks = point.split(",");
                             if(chunks.length >=2) {
-                                pointsStr.add(chunks[1] + " " + chunks[0]);
+                                formatGeoCoord(pointsStr, chunks);
                             }
                         }
                         if (pointsStr.size() >= 2){
@@ -140,6 +142,13 @@ public class KMLParser {
             foundLineString = true;
         }
         return foundLineString;
+    }
+
+    private void formatGeoCoord(List<String> pointsStr, String[] chunks) {
+        double lat = Double.parseDouble(chunks[1]);
+        double lng = Double.parseDouble(chunks[0]);
+        DecimalFormat fmt = GeoPoint.getLatitudeLongitudeFormat();
+        pointsStr.add(fmt.format(lng) + " " + fmt.format(lat));
     }
 
     private boolean extractAndSetPolygon(ColumnFactory cf, Element e, Row r) {
@@ -157,10 +166,10 @@ public class KMLParser {
                         for (String point : points) {
                             if (StringUtils.isBlank(point)){
                                 continue;
-                            };
+                            }
                             String[] chunks = point.split(",");
                             if(chunks.length >=2) {
-                                pointsStr.add(chunks[1] + " " + chunks[0]);
+                                formatGeoCoord(pointsStr, chunks);
                             }
                         }
                         if (pointsStr.size() >= 2){
