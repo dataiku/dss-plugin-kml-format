@@ -152,7 +152,7 @@ public class KMLParser {
                             }
                         }
                         if (pointsStr.size() >= 2){
-                            r.put(cf.column("geom"), "POLYGON(" + StringUtils.join(pointsStr, ",") + ")");
+                            r.put(cf.column("geom"), "POLYGON((" + StringUtils.join(pointsStr, ",") + "))");
                         }
                     }
                 }
