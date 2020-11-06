@@ -182,5 +182,4 @@ public class KMLFormatTest {
         );
         assertThat(rowAccumulator.rows, is(expected));
     }
-
 }

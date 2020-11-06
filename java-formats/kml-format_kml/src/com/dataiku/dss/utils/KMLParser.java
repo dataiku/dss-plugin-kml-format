@@ -47,16 +47,21 @@ public class KMLParser {
             Element e = (Element)node;
             Row r = rf.row();
             putContentIfExistsInChild(cf, r, "name", e, "name");
-            putAttrValueIfExists(cf, r, "id", e, "id");
-            extractAndSetPoint(cf, e, r);
-            extractAndSetLineString(cf, e, r);
-            extractAndSetPolygon(cf, e, r);
-            extractAndSetExtendedData(cf, e, r);
-            putContentIfExistsInChild(cf, r, "description", e, "description");
-            putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
-            putContentIfExistsInChild(cf, r, "address", e, "address");
-            putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
-            out.emitRow(r);
+            boolean foundPoint = extractAndSetPoint(cf, e, r);
+            boolean foundLineString = extractAndSetLineString(cf, e, r);
+            boolean foundPolygon = extractAndSetPolygon(cf, e, r);
+            boolean foundParsableGeoObject = foundLineString || foundPoint || foundPolygon;
+            if (foundParsableGeoObject){
+                putAttrValueIfExists(cf, r, "id", e, "id");
+                extractAndSetExtendedData(cf, e, r);
+                putContentIfExistsInChild(cf, r, "description", e, "description");
+                putContentIfExistsInChild(cf, r, "snippet", e, "Snippet");
+                putContentIfExistsInChild(cf, r, "address", e, "address");
+                putContentIfExistsInChild(cf, r, "phoneNumber", e, "phoneNumber");
+                out.emitRow(r);
+            } else {
+                logger.infoV("Warning: A placemark has been skipped due to unsupported geospatial format.");
+            }
         }
     }
 
@@ -84,7 +89,8 @@ public class KMLParser {
         }
     }
 
-    private void extractAndSetPoint(ColumnFactory cf, Element e, Row r) {
+    private boolean extractAndSetPoint(ColumnFactory cf, Element e, Row r) {
+        boolean foundPoint = false;
         Element pointNode = getFirstNodeByTagName(e, "Point");
         if (pointNode != null) {
             Element coordsElt = getFirstNodeByTagName(pointNode, "coordinates");
@@ -99,10 +105,13 @@ public class KMLParser {
                     }
                 }
             }
+            foundPoint = true;
         }
+        return foundPoint;
     }
 
-    private void extractAndSetLineString(ColumnFactory cf, Element e, Row r) {
+    private boolean extractAndSetLineString(ColumnFactory cf, Element e, Row r) {
+        boolean foundLineString = false;
         Element linestringNode = getFirstNodeByTagName(e, "LineString");
         if (linestringNode != null) {
             Element coordsElt = getFirstNodeByTagName(linestringNode, "coordinates");
@@ -128,10 +137,13 @@ public class KMLParser {
                     }
                 }
             }
+            foundLineString = true;
         }
+        return foundLineString;
     }
 
-    private void extractAndSetPolygon(ColumnFactory cf, Element e, Row r) {
+    private boolean extractAndSetPolygon(ColumnFactory cf, Element e, Row r) {
+        boolean foundPolygon = false;
         Element linestringNode = getFirstNodeByTagName(e, "Polygon");
         if (linestringNode != null) {
             Element coordsElt = getFirstNodeByTagName(linestringNode, "coordinates");
@@ -157,7 +169,9 @@ public class KMLParser {
                     }
                 }
             }
+            foundPolygon = true;
         }
+        return foundPolygon;
     }
 
 
