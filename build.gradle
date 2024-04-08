@@ -53,7 +53,7 @@ dependencies {
     implementation name: 'dss-shadelib-assembly'
     implementation 'com.google.code.gson:gson:+'
     implementation 'log4j:log4j:+'
-    implementation name: 'guava-27.0-jre'
+    implementation name: 'guava-32.0.1-jre'
     implementation name: 'dataiku-prepare-core'
     implementation configurations.remoteCompileDeps
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
